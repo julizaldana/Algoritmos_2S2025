@@ -10,6 +10,12 @@ public class SistemaInventario {
     static int[] cantidades = new int[MAX_PRODUCTOS];
     static int[] vendidos = new int[MAX_PRODUCTOS];
     static int productos = 0;
+    //Variables globales temporales para estadisticas.
+    static String[] tempCodigos = new String[MAX_PRODUCTOS];
+    static String[] tempNombres = new String[MAX_PRODUCTOS];
+    static double[] tempPrecios = new double[MAX_PRODUCTOS];
+    static int[] tempCantidades = new int[MAX_PRODUCTOS];
+
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -36,7 +42,7 @@ public class SistemaInventario {
                         mostrarReportes();
                         break;
                     case 5:
-                        // mostrarEstadisticas();
+                        mostrarEstadisticas();
                         break;
                     case 6:
                         salir = true;
@@ -300,6 +306,120 @@ public class SistemaInventario {
             System.out.println("No hay datos para reportes");
         }
     }
+
+
+    public static void intercambiar(int pos1, int pos2) {
+        // Intercambiar códigos
+        String tempCodigo = tempCodigos[pos1];
+        tempCodigos[pos1] = tempCodigos[pos2];
+        tempCodigos[pos2] = tempCodigo;
+
+        // Intercambiar nombres
+        String tempNombre = tempNombres[pos1];
+        tempNombres[pos1] = tempNombres[pos2];
+        tempNombres[pos2] = tempNombre;
+
+        // Intercambiar precios
+        double tempPrecio = tempPrecios[pos1];
+        tempPrecios[pos1] = tempPrecios[pos2];
+        tempPrecios[pos2] = tempPrecio;
+
+        // Intercambiar cantidades
+        int tempCantidad = tempCantidades[pos1];
+        tempCantidades[pos1] = tempCantidades[pos2];
+        tempCantidades[pos2] = tempCantidad;
+    }
+
+
+    public static void mostrarEstadisticas() {
+        if (productos > 0) {
+            System.out.println("=== ESTADÍSTICAS ===");
+
+            // 1. Promedio de precios
+            double sumaPrecios = 0;
+            for (int i = 0; i < productos; i++) {
+                sumaPrecios += precios[i];
+            }
+            double promedio = sumaPrecios / productos;
+            System.out.printf("1. PROMEDIO DE PRECIOS: Q%.2f\n", promedio);
+
+            // 2. Productos sobre el promedio
+            System.out.println("2. PRODUCTOS SOBRE EL PROMEDIO:");
+            int contadorSobre = 0;
+            for (int i = 0; i < productos; i++) {
+                if (precios[i] > promedio) {
+                    System.out.printf("- %s: Q%.2f\n", nombres[i], precios[i]);
+                    contadorSobre++;
+                }
+            }
+            System.out.println("Total: " + contadorSobre + " productos");
+
+            // 3. Productos bajo el promedio
+            System.out.println("3. PRODUCTOS BAJO EL PROMEDIO:");
+            int contadorBajo = 0;
+            for (int i = 0; i < productos; i++) {
+                if (precios[i] < promedio) {
+                    System.out.printf("- %s: Q%.2f\n", nombres[i], precios[i]);
+                    contadorBajo++;
+                }
+            }
+            System.out.println("Total: " + contadorBajo + " productos");
+
+            // 4. Ordenar productos por precio o cantidad
+            System.out.println("4. ORDENAR PRODUCTOS");
+            System.out.println("a) Por precio");
+            System.out.println("b) Por cantidad");
+            System.out.print("Elija opción: ");
+            Scanner scanner = new Scanner(System.in);
+            String opcionOrden = scanner.nextLine().toLowerCase();
+
+            // Crear copias de los arrays originales
+            for (int i = 0; i < productos; i++) {
+                tempCodigos[i] = codigos[i];
+                tempNombres[i] = nombres[i];
+                tempPrecios[i] = precios[i];
+                tempCantidades[i] = cantidades[i];
+            }
+
+            if (opcionOrden.equals("a")) {
+                // Ordenar por precio
+                for (int i = 0; i < productos - 1; i++) {
+                    for (int j = 0; j < productos - 1 - i; j++) {
+                        if (tempPrecios[j] > tempPrecios[j + 1]) {
+                            intercambiar(j, j + 1);
+                        }
+                    }
+                }
+                System.out.println("PRODUCTOS ORDENADOS POR PRECIO:");
+            } else if (opcionOrden.equals("b")) {
+                // Ordenar por cantidad
+                for (int i = 0; i < productos - 1; i++) {
+                    for (int j = 0; j < productos - 1 - i; j++) {
+                        if (tempCantidades[j] > tempCantidades[j + 1]) {
+                            intercambiar(j, j + 1);
+                        }
+                    }
+                }
+                System.out.println("PRODUCTOS ORDENADOS POR CANTIDAD:");
+            } else {
+                System.out.println("Opción inválida");
+                return;
+            }
+
+            // Mostrar el TOP 10 o menos
+            int limite = Math.min(10, productos);
+            System.out.println("TOP " + limite + " PRODUCTOS:");
+            for (int i = 0; i < limite; i++) {
+                System.out.printf("%d. %s - Q%.2f - Stock: %d\n", 
+                    i + 1, tempNombres[i], tempPrecios[i], tempCantidades[i]);
+            }
+
+        } else {
+            System.out.println("No hay datos para estadísticas");
+        }
+    }
+
+
 
 
 
